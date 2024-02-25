@@ -1,0 +1,37 @@
+[colors.primary]
+background = "#13171b"
+
+[cursor.style]
+blinking = "On"
+shape = "Block"
+
+[font]
+#draw_bold_text_with_bright_colors = true
+size = 9.5
+
+[font.bold]
+family = "HasklugNerdFontPropo"
+style = "Bold"
+
+[font.bold_italic]
+family = "JetBrainsMono Nerd Font"
+style = "Bold Italic"
+
+[font.italic]
+family = "JetBrains Mono Nerd Font"
+style = "Italic"
+
+[font.normal]
+family = "HasklugNerdFontPropo"
+style = "Regular"
+
+[shell]
+program = "/usr/bin/zsh"
+
+[window]
+opacity = 0.78
+title = "none"
+
+[window.padding]
+x = 15
+y = 10

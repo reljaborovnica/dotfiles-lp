@@ -1,0 +1,2 @@
+[console_scripts]
+tongfang-control = tongfang_control.main:main

@@ -1,0 +1,2 @@
+main color 181825AA -fg CDD6F4 -framecolor 07051f
+leafbg - 13171b44 - -framecolor 36454F

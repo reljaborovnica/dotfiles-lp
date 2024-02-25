@@ -1,0 +1,296 @@
+Metadata-Version: 2.1
+Name: tongfang-control
+Version: 0.0.1
+Summary: Command line tool for controlling various features of Tongfang-based laptops' such as RGB lighting and fan speed.
+Home-page: https://gitlab.com/siphomateke/tongfang-control
+Author: Sipho Mateke
+Author-email: siphomateke@gmail.com
+License: MIT
+Project-URL: Bug Reports, https://gitlab.com/siphomateke/tongfang-control/issues
+Project-URL: Source, https://gitlab.com/siphomateke/tongfang-control
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+
+# Tongfang Unofficial Control Center
+
+An open-source cross-platform control centre for controlling various features of Tongfang-based laptops' such as RGB lighting and fan speed. Developed for the GK5CP0Z but will likely work with similar models (GK5CN5Z, GK5CN6Z, GK5CQ7Z etc.).
+
+This software was primarily developed for Linux since no first-class control centers existed. If you are using Windows, this software is currently no better than the standard Gaming Center applications offered by various vendors such as Eluktronics. In the future, certain features will be added that are not supported by the OEM software such as fan speed readings and temperature curves.
+
+This is project was started before [Tuxedo Computer's control center](https://github.com/tuxedocomputers/tuxedo-control-center) was discovered. It basically does what this control center does but seems to control fan speed in userspace rather than using the builtin fan speed settings. It also doesn't yet support RGB lighting control. If you have a Clevo laptop, consider using it instead. This project may be merged into that in the future if Tuxedo Computer's is interested.
+
+## Supported devices
+
+- Tongfang gaming laptops: GK5CN5Z / GK5CN6Z / GK5CQ7Z / GK5CP0Z (Barebone)
+- Wootbook Ultra 2060 (GK5CP0Z)
+- Aftershock Apex 15 RTX 2060 (GK5CP0Z)
+- llegear Onyx Laptop RTX 2060 (GK5CP0Z)
+
+Various Clevo, Mechrevo, Eluktronics, XMG, Avell and Aftershock laptops that use the same chassis probably also work.
+
+## Installation
+
+First, if you are on Linux, you will need the `acpi-call-dkms` kernel module. To install it on Ubuntu, run:
+
+```bash
+sudo apt install acpi-call-dkms
+sudo modprobe acpi_call
+```
+
+Then build and install the package:
+
+```bash
+python3 setup.py build
+sudo python3 setup.py install
+```
+
+## Usage
+
+Please note that this project is still in heavily development and is not ready for daily usage.
+
+Once the package is installed, it can be used using the `tongfang-control` command.
+
+```bash
+# Show all possible commands and values
+tongfang-control --help
+
+# Set light bar color to red
+tongfang-control --lightbar-color 255 0 0
+
+# Enable the light bar's rainbow mode which cycles between multiple colors.
+tongfang-control --lightbar-colorful true
+
+# Change fan mode to one that intelligently adjusts the fan speed proportionally to temperatures.
+# This mode is equivalent to the gaming mode in the official Tongfang control center for Windows.
+tongfang-control --fan-mode intelligent
+# Set fan mode to intelligent and enable fan boost to run fans at their maximum speed.
+tongfang-control --fan-mode boost
+
+# Set the fan's loudness to silent. This is equivalent to the advanced silent mode in the official
+# Tongfang control center for windowsW
+tongfang-control --fan-loudness quiet
+# Make the fan's as quiet as possible.
+tongfang-control --fan-loudness silent
+
+# Display fan speed and temperature every 2 seconds
+tongfang-control --monitor
+```
+
+## Related projects
+
+- [Tuxedo Control Center](https://github.com/tuxedocomputers/tuxedo-control-center) - Control center for Tuxedo laptops with support for fan speed adjustment using profiles. Works with Tongfang and Clevo laptops that use the Uniwill OEM interface. ([See the driver for more](https://github.com/tuxedocomputers/tuxedo-cc-wmi)).
+- [tuxedo-cc-wmi](https://github.com/tuxedocomputers/tuxedo-cc-wmi) - Kernel driver for interacting with Tongfang and Clevo laptops WMI interfaces. Supports changing fan speed and mode as well as reading current fan speed and temperature.
+- [avell-unofficial-control-center](https://github.com/rodgomesc/avell-unofficial-control-center) - Driver to control laptop RGB keyboards that use the ITE Device(8291) controller (such as Tongfang gaming laptops).
+- [Notebook Review forum thread on Tongfang laptops](http://forum.notebookreview.com/threads/tongfang-gk5cn5z-gk5cn6z-gk5cq7z-gk5cp0z.815943/) - Contains hacks, tips, tricks, guides and reviews on and, drivers and software for Tongfang laptops.
+- [gk5cn6z_rgb_control](https://github.com/ehntoo/gk5cn6z_rgb_control/) - RGB control for GK5CN6Z laptops.
+- [gk5cn6z_wmi](https://github.com/ehntoo/gk5cn6z_wmi) - Kernel module to add backlight brightness support to Tongfang GK5CN6z (and possibly related) laptops. Contains lots of helpful links on how to debug the ACPI and WMI calls necessary to control Tongfang laptops.
+- [Rev.Center2-FanManager](https://github.com/lKinderBueno/Rev.Center2-FanManager), [Rev.Center2-Keyboard](https://github.com/lKinderBueno/Rev.Center2-Keyboard), [Rev.Center2-Main-LedBar](https://github.com/lKinderBueno/Rev.Center2-Main-LedBar) - Alternative gaming control center. Very useful for figuring out what calls must be made.
+- [QC71 Laptop Kernel Driver](https://github.com/pobrn/qc71_laptop) - Kernel platform driver for Whitebook LAPQC71X systems (XMG Fusion 15, Eluktronics MAG 15, Aftershock Vapor 15, ...) that also supports Tongfang laptop's with some tweaks. Supports integrating fan speeds into Linux hardware monitoring software (such as `lm_sensors`), controlling the lightbar, modifying fan speeds and more.
+
+## History
+
+This is a brief rundown of the steps taken to develop this project and make it work on Linux.
+
+The first step is to figure out what commands the Tongfang control center for Windows uses to change things like fan speed and light bar color. Looking at some of the source code, we can see snippets like:
+
+```c#
+ManagementObject managementObject = new ManagementObject("root\\WMI", "AcpiTest_MULong.InstanceName='ACPI\\PNP0C14\\1_1'", (ObjectGetOptions) null);
+```
+
+This indicates that the control center is using [Windows Management Instrumentation (WMI)](https://wiki.ubuntu.com/Kernel/Reference/WMI) to access the [Advanced Configuration and Power Interface (ACPI)](https://en.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface). The main WMI class used to read and write light bar and fan values is `AcpiTest_MULong`. To access this class from Linux, we first need to figure out it's GUID. This can be done by looking at the documentation for this WMI class found in extracted `.mof` files for the particular laptop's model such as <https://github.com/ehntoo/gk5cn6z_wmi/blob/master/gk5cn6z_wqba.mof>. This file tells us that the GUID of `AcpiTest_MULong` is `ABBC0F6F-8EA1-11d1-00A0-C90629100000`:
+
+```txt
+[WMI,
+ Dynamic,
+ Provider("WmiProv"),
+ Locale("MS\\0x409"),
+ Description("Class used to operate methods on a ULong"),
+ guid("{ABBC0F6F-8EA1-11d1-00A0-C90629100000}")
+]
+class AcpiTest_MULong {
+  [key, read] String InstanceName;
+  [read] Boolean Active;
+
+  [WmiMethodId(1),
+   Implemented,
+   read, write,
+   Description("Return the contents of a ULong")
+  ] void GetULong([out, Description("Ulong Data")] uint32 Data);
+
+  [WmiMethodId(2),
+   Implemented,
+   read, write,
+   Description("Set the contents of a ULong")
+  ] void SetULong([in, Description("Ulong Data")] uint32 Data);
+
+  [WmiMethodId(3),
+   Implemented,
+   read, write,
+   Description("Generate an event containing ULong data")
+  ] void FireULong([in, Description("WMI requires a parameter")] uint32 Hack);
+
+  [WmiMethodId(4),
+   Implemented,
+   read, write,
+   Description("Get and Set the contents of a ULong")
+  ] void GetSetULong(
+    [in, Description("Ulong Data")] uint64 Data,
+    [out, Description("Ulong Data")] uint32 Return
+  );
+
+  [WmiMethodId(5),
+   Implemented,
+   read, write,
+   Description("Get and Set the contents of a ULong for Dollby button")
+  ] void GetButton([in, Description("Ulong Data")] uint64 Data, [out, Description("Ulong Data")] uint32 Return);
+};
+```
+
+There is also another WMI class for writing to the BIOS RAM and making light bar colors persistent. This class is `AcpiODM_Demo` and its GUID is `DBBC0F6F-8EA1-11d1-00A0-C90629100000` as per <https://github.com/ehntoo/gk5cn6z_wmi/blob/master/gk5cn6z_wqba2.mof>:
+
+```txt
+class WMIEvent : __ExtrinsicEvent {
+};
+
+[WMI, Locale("MS\\0x409"), Description("This class contains the definition of the package used in other classes"), guid("{ABBC0F60-8EA1-11d1-00A0-C90629100000}")]
+class Package {
+  [WmiDataId(1), read, write, Description("16 bytes of data")] uint8 Bytes[16];
+};
+
+[WMI, Dynamic, Provider("WmiProv"), Locale("MS\\0x409"), Description("Class used to operate methods on a ULong"), guid("{DBBC0F6F-8EA1-11d1-00A0-C90629100000}")]
+class AcpiODM_Demo {
+  [key, read] String InstanceName;
+  [read] Boolean Active;
+
+  [WmiMethodId(1), Implemented, read, write, Description("Get Set the contents of a Long for Ex1")] void GetUlongEx1([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(2), Implemented, read, write, Description("Get Set the contents of a Long for Ex2")] void GetUlongEx2([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(3), Implemented, read, write, Description("Get Set the contents of a Long for Ex3")] void GetUlongEx3([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(4), Implemented, read, write, Description("Get Set the contents of a Long for Ex4")] void GetUlongEx4([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(5), Implemented, read, write, Description("Get Set the contents of a Long for Ex5")] void GetUlongEx5([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(6), Implemented, read, write, Description("Get Set the contents of a Long for Ex6")] void GetUlongEx6([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(7), Implemented, read, write, Description("Get Set the contents of a Long for Ex7")] void GetUlongEx7([in, Description("int64 Data")] uint64 Data, [out, Description("long Data")] uint32 Return);
+  [WmiMethodId(8), Implemented, read, write, Description("Get Set the contents of a Long for Ex8")] void GetUlongEx8([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(9), Implemented, read, write, Description("Get Set the contents of a Long for Ex9")] void GetUlongEx9([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+  [WmiMethodId(10), Implemented, read, write, Description("Get Set the contents of a Long for Ex10")] void GetUlongEx10([in, Description("long Data")] sint32 Data, [out, Description("long Data")] sint32 Return);
+};
+```
+
+We can then correlate the GUIDs of the classes above with the output of `fwts wmi -` to determine the class names on Linux (See
+<https://wiki.ubuntu.com/Kernel/Reference/WMI>):
+
+```txt
+\_SB_.AMW0._WDG (6 of 10)
+  GUID: ABBC0F6F-8EA1-11D1-00A0-C90629100000
+  WMI Method:
+    Flags          : 0x02 (Method)
+    Object ID      : BC
+    Instance       : 0x0a
+FAILED [LOW] WMIMultipleMethod: Test 1, GUID
+ABBC0F6F-8EA1-11D1-00A0-C90629100000 has multiple associated methods WMBC
+defined, this is a firmware bug that leads to ambiguous behaviour.
+```
+
+and for `AcpiODM_Demo`:
+
+```txt
+\_SB_.OTA0._WDG (1 of 2)
+  GUID: DBBC0F6F-8EA1-11D1-00A0-C90629100000
+  WMI Method:
+    Flags          : 0x02 (Method)
+    Object ID      : BC
+    Instance       : 0x0a
+FAILED [LOW] WMIMultipleMethod: Test 1, GUID DBBC0F6F-8EA1-11D1-00A0-C90629100000 has multiple associated methods WMBC defined, this is a firmware bug that leads
+to ambiguous behaviour.
+```
+
+After finding this, we can try actually making some ACPI calls using [acpi_call](https://github.com/mkottman/acpi_call) (`sudo
+apt install acpi-call-dkms`). Let's first try a simple query to get the current value of the light
+bar. Based on the Windows control center, doing this requires `AcpiTest_MULong.GetSetULong` to be called with an unsigned integer representing the ID of the light bar, `1895UL`. Additionally, before passing this ID to the `GetSetULong`, it must be converted to a supported format by adding `0x10000000000` to it. So the final value that must be passed to `GetSetULong` is `0x10000000000 + 1895UL = 1099511629671`.
+
+Based on the output of `fwts` from above, we now know that the WMI class is `\_SB_.AMW0.WMBC`. All WMI methods are prefixed with `WM` (See [Linux WMI reference](https://wiki.ubuntu.com/Kernel/Reference/WMI#WMxx_Methods)) and are followed by the object ID of the particular method, in this case, `BC`. As per the WMI reference:
+
+> These [WMI] methods take 3 arguments, the first is a ULONG specifying the  instance index being executed [...] The second contains the  method ID of the method being executed. The third argument contains the input data for that method call.
+
+How to determine the instance index is still unclear but 0 appears to work. The method ID for `GetSetULong` is 4 based on the `.mof` file documentation above, and our input data is `1099511629671`.
+
+Before we actually try running this ACPI command, we should [debug it using acpiexec](https://wiki.ubuntu.com/Kernel/Reference/ACPITricksAndTips#acpiexec). First, we confirm that the full class method exists by running `methods` in acpiexec. Searching the output, we find that there is indeed a method called `\_SB.AMW0.WMBC` that takes 3 arguments. We can now simulate checking the light bar's current value:
+
+```txt
+execute _SB.AMW0.WMBC 0 4 1099511629640
+```
+
+If all is well, this should return a buffer like this:
+
+```txt
+Evaluation of \_SB.AMW0.WMBC returned object 0x5559bfcaacd0, external buffer length 40
+  [Buffer] Length 28 =
+    0000: FE FE FE FE 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    0010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    0020: 00 00 00 00 00 00 00 00                          // ........
+```
+
+We can now try running the ACPI call on the live system using the following command:
+
+```bash
+echo '\_SB.AMW0.WMBC 0 4 1099511629640' | sudo tee /proc/acpi/call
+sudo cat /proc/acpi/call
+```
+
+This should return a buffer matching the output from our acpiexec simulation.
+
+Now that we can actually read the ACPI data, the next step is converting it into a usable format and interpreting its meaning. By running the same commands on Windows using C# or WMI libraries such as [Python's WMI](https://pypi.org/project/WMI/), we can figure out how the buffers are cnoverted and what the converted values mean. Below is a table showing various methods responses;
+
+| Prop name | Prop   | Prop address  | State     | Return (uint) | Return (byte) | notes                             |
+| --------- | ------ | ------------- | --------- | ------------- | ------------- | --------------------------------- |
+| Lightbar  | 1864UL | 1099511629640 | Enabled   | 3081          | 9             |                                   |
+|           | 1864UL | 1099511629640 | Enabled   | 1033          | 9             | bitwise or = 41                   |
+|           | 1864UL | 1099511629640 | Disabled  | 1037          | 13            | flipped and converted to byte = 0 |
+| Fan       | 1873UL | 1099511629649 | Game mode | 27808         | 160           |                                   |
+
+In the original Windows control center software, the unsigned integer responses are converted to bytes using this C# code
+
+```csharp
+(byte) (Convert.ToUInt64(data) & (ulong) byte.MaxValue)
+```
+
+The responses on Windows can then be compared to those on Linux to figure out how to convert the buffers from the Linux ACPI calls to the unsigned integers returned on Windows.
+
+| Prop name | Command                          | State     | Return                                                                                                                                                                                                                                           |
+| --------- | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lightbar  | \_SB.AMW0.WMBC 0 4 1099511629640 | Enabled   | {0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} |
+| Fan       | \_SB.AMW0.WMBC 0 4 1099511629649 | Game mode | {0xa0, 0x6c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} |
+
+Looking at the above buffers, we can see that they are simply reversed byte array versions of the integers returned on Windows. For example, the value when the fan is in game mode is:
+
+```python
+{0xa0,0x6c,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}
+= 0x0000000000000000000000006CA0
+= 27808
+```
+
+The integer can then be converted to a byte by doing a bitwise AND with 255:
+
+```python
+27808 & 255
+= 160
+```
+
+We can then follow similar steps to figure out how to call `AcpiODM_Demo.GetUlongEx7` in order to write to the BIOS RAM and make light bar colors persistent. Using the above steps, we can figure out that the class is `\_SB.OTA0.WMBC` and method ID for `GetUlongEx7` is 7. So an actual command would look like this:
+
+```txt
+execute \_SB.OTA0.WMBC 0 7 <value>
+```
+
+Which returns a response like:
+
+```txt
+Evaluating \_SB.OTA0.WMBC
+Evaluation of \_SB.OTA0.WMBC returned object 0x55fcde965cd0, external buffer length 18
+  [Integer] = 00000000FFFFFFFF
+```

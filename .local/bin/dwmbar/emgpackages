@@ -1,0 +1,2 @@
+#!/bin/sh
+eix --installed --upgrade | grep 'Found *' | cut -d" " -f2 | sed "s/^/📦 /;s/^📦 0$//g"

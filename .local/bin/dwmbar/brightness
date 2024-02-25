@@ -1,0 +1,9 @@
+#!/bin/sh 
+case $BUTTON in
+#	1) notify-send "Backlight: " "$(brightnessctl set 10%+ | grep Current) " ;;
+#	2) notify-send "Backlight: " "$(brightnessctl set 10%- | grep Current) "
+#	1) `brightnessctl set 10%+` ;;
+#	2) `brightnessctl set 10%-`
+esac
+
+brightnessctl | awk '/Current brightness/ {print "🌞" $4} ' | sed 's/[()]//g'
