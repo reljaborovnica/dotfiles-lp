@@ -24,5 +24,5 @@ Just my personal stash of config files for my laptop. They're here for safekeepi
 - **Notification Daemon:** Dunst
 - **System Info Display:** Neofetch
 - **Text Editor:** Neovim
-- **Compositor:** Picom (formerly known as Compton)
+- **Compositor:** Picom
 - **Screenshot Tool:** Flameshot
